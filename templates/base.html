@@ -1,0 +1,47 @@
+<!-- Defines the document as HTML -->
+<!-- Specifies that the webpage content is written in English -->
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!-- Defines the webpage settings -->
+<!-- Including character encoding, responsive sizing, page title, CSS stylesheet, and
+the MUNCH. favicon -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}MUNCH.{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='recipe-detail.css') }}">
+<link rel="icon"
+ href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100
+100'><text y='.9em' font-size='90'>  🍴</text></svg>">
+</head>
+<body>
+
+
+<!-- Creates the navigation bar with a link to the home page -->
+<!-- Displays different options depending on whether the user is logged in -->
+<nav class="navbar">
+  <a href="{{ url_for('index') }}" class="logo">  🍴 MUNCH.</a>
+  <div class="nav-links">
+    {% if current_user.is_authenticated %}
+         <a href="{{ url_for('logout') }}">Logout ({{ current_user.username }})</a>
+    {% else %}
+         <a href="{{ url_for('login') }}">Login</a>
+         <a href="{{ url_for('register') }}">Register</a>
+    {% endif %}
+  </div>
+</nav>
+
+
+<!-- Creates the main content area -->
+<!-- Provides a Jinja block where each page's individual content is displayed -->
+<main class="container">
+  {% block content %}{% endblock %}
+</main>
+
+
+<!-- Closes body and html tags -->
+</body>
+</html>

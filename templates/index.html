@@ -1,0 +1,94 @@
+<!-- Extends the base layout and sets the page title to MUNCH. -->
+{% extends 'base.html' %}
+{% block title %}MUNCH.{% endblock %}
+
+
+<!-- Begins main content section -->
+{% block content %}
+
+
+<!-- Page heading and sub-heading-->
+<h1>Your Personalized CookBook!</h1>
+<p class="subtitle">Search By Ingredient or Browse All Recipes</p>
+
+
+<!-- Creates a search form -->
+<!-- Allows users to enter an ingredient and find matching recipes -->
+<div class="homepage-layout">
+<aside class="sidebar">
+  <form method="GET" action="{{ url_for('index') }}" class="search-form">
+    <input type="text" name="ingredient" placeholder="Input Ingredient Name" value="{{
+request.args.get('ingredient', '') }}">
+    <button type="submit" class="btn-primary">Search</button>
+  </form>
+
+
+  <div class="about-munch">
+     <h3>About   🍴 MUNCH.</h3>
+    <p>MUNCH. is a personalized recipe discovery platform that helps you find
+delicious meals.
+     It allows you to search for recipes based on the ingredients you have at home,
+use filters for maximum personalization or browse through a wide variety of
+dishes.</p>
+  </div>
+</aside>
+
+
+<!-- Main content area containing filters and recipe grid -->
+<main class="main-content">
+  <!-- Filter controls for categories, difficulty, and dietary options -->
+  <div class="filter-row">
+    <select name="category" form="filter-form">
+      <option value="">Categories</option>
+      {% for c in categories %}
+           <option value="{{ c }}" {% if request.args.get('category') == c %}selected{%
+endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+    <select name="difficulty" form="filter-form">
+      <option value="">Difficulty</option>
+      {% for d in difficulties %}
+           <option value="{{ d }}" {% if request.args.get('difficulty') == d %}selected{%
+endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+
+
+     <select name="cook_time" form="filter-form">
+       <option value="">Cook Time</option>
+       <option value="under30" {% if request.args.get('cook_time') == 'under30'
+%}selected{% endif %}>Under 30 min</option>
+       <option value="30to60" {% if request.args.get('cook_time') == '30to60'
+%}selected{% endif %}>30–60 min</option>
+       <option value="over60" {% if request.args.get('cook_time') == 'over60'
+%}selected{% endif %}>Over 60 min</option>
+     </select>
+
+
+    <button type="submit" form="filter-form" class="btn-primary">Apply
+Filters</button>
+  </div>
+  <!-- Hidden form for filter submission -->
+  <form id="filter-form" method="GET" action="{{ url_for('index') }}">
+    <input type="hidden" name="ingredient" value="{{ request.args.get('ingredient',
+'') }}">
+  </form>
+
+
+  <!-- Grid displaying all recipes as clickable cards -->
+  <div class="recipe-grid">
+    <!-- Iterates through all recipes and displays them as individual cards -->
+    {% for recipe in recipes %}
+      <a href="{{ url_for('recipe', recipe_id=recipe['recipe_id']) }}"
+class="recipe-card-link">
+           <div class="recipe-card">
+             <h3>{{ recipe['title'] }}</h3>
+             <p>{{ recipe['category'] }} · {{ recipe['cook_time'] }} min · {{
+recipe['difficulty'] }}</p>
+           </div>
+      </a>
+    {% endfor %}
+  </div>
+</main>
+</div>
+{% endblock %}

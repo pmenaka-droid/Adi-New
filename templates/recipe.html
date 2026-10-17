@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}{{ recipe['title'] }}{% endblock %}
+{% block content %}
+
+
+<div class="recipe-detail">
+ <h1 class="recipe-name-box">{{ recipe['title'] }}</h1>
+
+
+ <div class="recipe-detail-columns">
+
+
+   <div class="recipe-column recipe-ingredients-col">
+     <h2>Ingredients</h2>
+     <ul class="ingredient-list">
+       {% for item in ingredients %}
+            <li>{{ item['quantity'] }} {{ item['name'] }}</li>
+       {% endfor %}
+     </ul>
+   </div>
+
+
+   <div class="recipe-column recipe-instructions-col">
+     <h2>Instructions</h2>
+     <p class="recipe-instructions">{{ recipe['instructions'] }}</p>
+   </div>
+
+
+   <div class="recipe-column recipe-media-col">
+     {% if recipe['image_file'] %}
+       <img src="{{ recipe['image_file'] }}" alt="{{ recipe['title'] }}"
+class="recipe-detail-image">
+     {% endif %}
+
+
+     {% if current_user.is_authenticated %}
+       <form method="POST" action="{{ url_for('toggle_save',
+recipe_id=recipe['recipe_id']) }}">
+            {% if is_saved %}
+              <button type="submit" class="btn-primary btn-saved">★ Saved — Click to
+Remove</button>
+            {% else %}
+              <button type="submit" class="btn-primary">☆ Save Recipe</button>
+            {% endif %}
+       </form>
+     {% else %}
+       <p class="save-prompt"><a href="{{ url_for('login') }}">Log in</a> to save this
+recipe.</p>
+       {% endif %}
+
+
+       <div class="recipe-stats-box">
+          <p><strong>Cook Time:</strong> {{ recipe['cook_time'] }} min</p>
+          <p><strong>Difficulty:</strong> {{ recipe['difficulty'] }}</p>
+
+
+       <div class="share-box">
+ <button type="button" class="btn-rating" onclick="copyRecipeLink(this)">    🔗 Copy
+Link</button>
+</div>
+
+
+<script>
+function copyRecipeLink(button) {
+ navigator.clipboard.writeText(window.location.href).then(() => {
+    const originalText = button.textContent;
+    button.textContent = "    ✅ Link Copied!";
+    setTimeout(() => {
+       button.textContent = originalText;
+    }, 2000);
+ });
+}
+</script>
+
+
+          <div class="rating-box">
+             <strong>Likes:</strong>
+             {% if current_user.is_authenticated %}
+                <form method="POST" action="{{ url_for('like_recipe',
+recipe_id=recipe['recipe_id']) }}" class="rating-form">
+                 <button type="submit" class="btn-rating">👍 {{ recipe['likes']
+}}</button>
+                </form>
+             {% else %}
+                <span>{{ recipe['likes'] }}   👍</span>
+             {% endif %}
+          </div>
+       </div>
+    </div>
+
+
+ </div>
+
+
+ <a href="{{ url_for('index') }}" class="back-link">← Back to all recipes</a>
+</div>
+{% endblock %}

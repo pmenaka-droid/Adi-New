@@ -1,0 +1,1510 @@
+<!-- Defines the document as HTML -->
+<!-- Specifies that the webpage content is written in English -->
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!-- Defines the webpage settings -->
+<!-- Including character encoding, responsive sizing, page title, CSS stylesheet, and
+the MUNCH. favicon -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}MUNCH.{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='recipe-detail.css') }}">
+<link rel="icon"
+ href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100
+100'><text y='.9em' font-size='90'>  🍴</text></svg>">
+</head>
+<body>
+
+
+<!-- Creates the navigation bar with a link to the home page -->
+<!-- Displays different options depending on whether the user is logged in -->
+<nav class="navbar">
+  <a href="{{ url_for('index') }}" class="logo">  🍴 MUNCH.</a>
+  <div class="nav-links">
+    {% if current_user.is_authenticated %}
+         <a href="{{ url_for('logout') }}">Logout ({{ current_user.username }})</a>
+    {% else %}
+         <a href="{{ url_for('login') }}">Login</a>
+         <a href="{{ url_for('register') }}">Register</a>
+    {% endif %}
+  </div>
+</nav>
+
+
+<!-- Creates the main content area -->
+<!-- Provides a Jinja block where each page's individual content is displayed -->
+<main class="container">
+  {% block content %}{% endblock %}
+</main>
+
+
+<!-- Closes body and html tags -->
+</body>
+</html>
+<!-- Extends the base layout and sets the page title to MUNCH. -->
+{% extends 'base.html' %}
+{% block title %}MUNCH.{% endblock %}
+
+
+<!-- Begins main content section -->
+{% block content %}
+
+
+<!-- Page heading and sub-heading-->
+<h1>Your Personalized CookBook!</h1>
+<p class="subtitle">Search By Ingredient or Browse All Recipes</p>
+
+
+<!-- Creates a search form -->
+<!-- Allows users to enter an ingredient and find matching recipes -->
+<div class="homepage-layout">
+<aside class="sidebar">
+  <form method="GET" action="{{ url_for('index') }}" class="search-form">
+    <input type="text" name="ingredient" placeholder="Input Ingredient Name" value="{{
+request.args.get('ingredient', '') }}">
+    <button type="submit" class="btn-primary">Search</button>
+  </form>
+
+
+  <div class="about-munch">
+     <h3>About   🍴 MUNCH.</h3>
+    <p>MUNCH. is a personalized recipe discovery platform that helps you find
+delicious meals.
+     It allows you to search for recipes based on the ingredients you have at home,
+use filters for maximum personalization or browse through a wide variety of
+dishes.</p>
+  </div>
+</aside>
+
+
+<!-- Main content area containing filters and recipe grid -->
+<main class="main-content">
+  <!-- Filter controls for categories, difficulty, and dietary options -->
+  <div class="filter-row">
+    <select name="category" form="filter-form">
+      <option value="">Categories</option>
+      {% for c in categories %}
+           <option value="{{ c }}" {% if request.args.get('category') == c %}selected{%
+endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+    <select name="difficulty" form="filter-form">
+      <option value="">Difficulty</option>
+      {% for d in difficulties %}
+           <option value="{{ d }}" {% if request.args.get('difficulty') == d %}selected{%
+endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+
+
+     <select name="cook_time" form="filter-form">
+       <option value="">Cook Time</option>
+       <option value="under30" {% if request.args.get('cook_time') == 'under30'
+%}selected{% endif %}>Under 30 min</option>
+       <option value="30to60" {% if request.args.get('cook_time') == '30to60'
+%}selected{% endif %}>30–60 min</option>
+       <option value="over60" {% if request.args.get('cook_time') == 'over60'
+%}selected{% endif %}>Over 60 min</option>
+     </select>
+
+
+    <button type="submit" form="filter-form" class="btn-primary">Apply
+Filters</button>
+  </div>
+  <!-- Hidden form for filter submission -->
+  <form id="filter-form" method="GET" action="{{ url_for('index') }}">
+    <input type="hidden" name="ingredient" value="{{ request.args.get('ingredient',
+'') }}">
+  </form>
+
+
+  <!-- Grid displaying all recipes as clickable cards -->
+  <div class="recipe-grid">
+    <!-- Iterates through all recipes and displays them as individual cards -->
+    {% for recipe in recipes %}
+      <a href="{{ url_for('recipe', recipe_id=recipe['recipe_id']) }}"
+class="recipe-card-link">
+           <div class="recipe-card">
+             <h3>{{ recipe['title'] }}</h3>
+             <p>{{ recipe['category'] }} · {{ recipe['cook_time'] }} min · {{
+recipe['difficulty'] }}</p>
+           </div>
+      </a>
+    {% endfor %}
+  </div>
+</main>
+</div>
+{% endblock %}
+<!-- Extends the base layout and sets the page title to Login -->
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+
+
+<!-- Begins main content section -->
+{% block content %}
+
+
+<!-- Page Heading -->
+<h1>Login to Existing Account</h1>
+
+
+<!-- Displays any temporary messages or errors sent by Flask -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+ {% for message in messages %}
+   <p style="color:red;">{{ message }}</p>
+ {% endfor %}
+{% endif %}
+{% endwith %}
+
+
+<!-- Creates a form which allows user to enter Email-->
+<form method="POST">
+<div class="form-group">
+<label for="email">Email</label>
+<input type="email" id="email" name="email" required>
+</div>
+
+
+<!-- Creates a form which allows user to enter Password-->
+<div class="form-group">
+<label for="password">Password</label>
+<input type="password" id="password" name="password" required>
+</div>
+
+
+<!--Creates a submit button-->
+<button type="submit" class="btn-primary">Login</button>
+</form>
+
+
+<!-- End main content section -->
+{% endblock %}
+{% extends 'base.html' %}
+{% block title %}{{ recipe['title'] }}{% endblock %}
+{% block content %}
+
+
+<div class="recipe-detail">
+ <h1 class="recipe-name-box">{{ recipe['title'] }}</h1>
+
+
+ <div class="recipe-detail-columns">
+
+
+   <div class="recipe-column recipe-ingredients-col">
+     <h2>Ingredients</h2>
+     <ul class="ingredient-list">
+       {% for item in ingredients %}
+            <li>{{ item['quantity'] }} {{ item['name'] }}</li>
+       {% endfor %}
+     </ul>
+   </div>
+
+
+   <div class="recipe-column recipe-instructions-col">
+     <h2>Instructions</h2>
+     <p class="recipe-instructions">{{ recipe['instructions'] }}</p>
+   </div>
+
+
+   <div class="recipe-column recipe-media-col">
+     {% if recipe['image_file'] %}
+       <img src="{{ recipe['image_file'] }}" alt="{{ recipe['title'] }}"
+class="recipe-detail-image">
+     {% endif %}
+
+
+     {% if current_user.is_authenticated %}
+       <form method="POST" action="{{ url_for('toggle_save',
+recipe_id=recipe['recipe_id']) }}">
+            {% if is_saved %}
+              <button type="submit" class="btn-primary btn-saved">★ Saved — Click to
+Remove</button>
+            {% else %}
+              <button type="submit" class="btn-primary">☆ Save Recipe</button>
+            {% endif %}
+       </form>
+     {% else %}
+       <p class="save-prompt"><a href="{{ url_for('login') }}">Log in</a> to save this
+recipe.</p>
+       {% endif %}
+
+
+       <div class="recipe-stats-box">
+          <p><strong>Cook Time:</strong> {{ recipe['cook_time'] }} min</p>
+          <p><strong>Difficulty:</strong> {{ recipe['difficulty'] }}</p>
+
+
+       <div class="share-box">
+ <button type="button" class="btn-rating" onclick="copyRecipeLink(this)">    🔗 Copy
+Link</button>
+</div>
+
+
+<script>
+function copyRecipeLink(button) {
+ navigator.clipboard.writeText(window.location.href).then(() => {
+    const originalText = button.textContent;
+    button.textContent = "    ✅ Link Copied!";
+    setTimeout(() => {
+       button.textContent = originalText;
+    }, 2000);
+ });
+}
+</script>
+
+
+          <div class="rating-box">
+             <strong>Likes:</strong>
+             {% if current_user.is_authenticated %}
+                <form method="POST" action="{{ url_for('like_recipe',
+recipe_id=recipe['recipe_id']) }}" class="rating-form">
+                 <button type="submit" class="btn-rating">👍 {{ recipe['likes']
+}}</button>
+                </form>
+             {% else %}
+                <span>{{ recipe['likes'] }}   👍</span>
+             {% endif %}
+          </div>
+       </div>
+    </div>
+
+
+ </div>
+
+
+ <a href="{{ url_for('index') }}" class="back-link">← Back to all recipes</a>
+</div>
+{% endblock %}
+<!-- Extends the base layout and sets the page title to Register -->
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+
+
+<!-- Begins main content section -->
+{% block content %}
+
+
+<!-- Page Heading -->
+<h1>Create a New Account</h1>
+
+
+<!-- Displays any temporary messages or errors sent by Flask -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+ {% for message in messages %}
+   <p style="color:red;">{{ message }}</p>
+ {% endfor %}
+{% endif %}
+{% endwith %}
+
+
+<!-- Creates a form which allows user to enter Email-->
+<form method="POST">
+<div class="form-group">
+<label for="email">Email</label>
+<input type="email" id="email" name="email" required>
+</div>
+
+
+<!-- Creates a form which allows user to enter Username-->
+<div class="form-group">
+<label for="username">Username</label>
+<input type="text" id="username" name="username" required>
+</div>
+
+
+<!-- Creates a form which allows user to enter Password-->
+<div class="form-group">
+<label for="password">Password</label>
+<input type="password" id="password" name="password" required>
+</div>
+
+
+<!--Creates a submit button-->
+<button type="submit" class="btn-primary">Register</button>
+</form>
+<!-- End main content section -->
+{% endblock %}
+<!-- Extends the base layout and sets the page title to MUNCH. -->
+{% extends 'base.html' %}
+{% block title %}Saved Recipes{% endblock %}
+
+
+<!-- Begins main content section -->
+{% block content %}
+
+
+<h1> Saved Recipes</h1>
+{% if recipes %}
+<div class="recipe-grid">
+   {% for recipe in recipes %}
+         <a href="{{ url_for('recipe', recipe_id=recipe['recipe_id']) }}"
+class="recipe-card-link">
+                <div class="recipe-card">
+                   <h3>{{ recipe['title'] }}</h3>
+                   <p>{{ recipe['catagory'] }} {{ recipe['cook_time'] }} min {{
+recipe['difficulty'] }}</p>
+                </div>
+         </a>
+   {% endfor %}
+</div>
+{% else %}
+   <p class="subtitle">You haven't saved any recipes yet. Browse recipes and click
+"Save Recipe" to add some here!</p>
+{% endif %}
+{% endblock %}
+import sqlite3
+import os
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_login import LoginManager, UserMixin, login_user, logout_user,
+login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
+app = Flask(__name__)
+app.secret_key = 'cookbook-secret-2025'
+
+
+DATABASE = 'cookbook.db'
+
+
+def get_db():
+   """Open one database connection per request"""
+   db = sqlite3.connect(DATABASE)
+   db.row_factory = sqlite3.Row
+   db.execute("PRAGMA foreign_keys = ON")
+   return db
+
+
+def init_db():
+   """Create all 5 tables when the app starts"""
+   db = get_db()
+   db.executescript('''
+      CREATE TABLE IF NOT EXISTS users (
+            user_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            email      TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL
+      );
+
+
+      CREATE TABLE IF NOT EXISTS recipes (
+            recipe_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+            title          TEXT NOT NULL,
+            instructions TEXT NOT NULL,
+            category       TEXT,
+            cook_time      INTEGER,
+            difficulty     TEXT,
+            dietary        TEXT,
+            image_file     TEXT,
+            likes          INTEGER DEFAULT 0,
+            dislikes       INTEGER DEFAULT 0,
+            uploader_id    INTEGER,
+               FOREIGN KEY (uploader_id) REFERENCES users(user_id)
+          );
+
+
+          CREATE TABLE IF NOT EXISTS ingredients (
+               ingredient_id INTEGER PRIMARY KEY AUTOINCREMENT,
+               name            TEXT NOT NULL UNIQUE
+          );
+
+
+          CREATE TABLE IF NOT EXISTS recipe_ingredients (
+               recipe_id       INTEGER,
+               ingredient_id INTEGER,
+               quantity        TEXT,
+               PRIMARY KEY (recipe_id, ingredient_id),
+               FOREIGN KEY (recipe_id)
+                  REFERENCES recipes(recipe_id),
+               FOREIGN KEY (ingredient_id)
+                  REFERENCES ingredients(ingredient_id)
+          );
+
+
+          CREATE TABLE IF NOT EXISTS saved_recipes (
+               user_id     INTEGER,
+               recipe_id INTEGER,
+               PRIMARY KEY (user_id, recipe_id),
+               FOREIGN KEY (user_id)
+                  REFERENCES users(user_id),
+               FOREIGN KEY (recipe_id)
+                  REFERENCES recipes(recipe_id)
+          );
+   ''')
+   db.commit()
+   db.close()
+
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+
+class User(UserMixin):
+   def __init__(self, user_id, username, email):
+          self.id = user_id
+          self.username = username
+          self.email = email
+@login_manager.user_loader
+def load_user(user_id):
+   db = get_db()
+   row = db.execute('SELECT * FROM users WHERE user_id = ?', (user_id,)).fetchone()
+   db.close()
+   if row:
+         return User(row['user_id'], row['username'], row['email'])
+   return None
+
+
+@app.route('/')
+def index():
+   db = get_db()
+
+
+   ingredient_query = request.args.get('ingredient', '').strip()
+   category_query = request.args.get('category', '').strip()
+   difficulty_query = request.args.get('difficulty', '').strip()
+   dietary_query = request.args.get('dietary', '').strip()
+   cook_time_query = request.args.get('cook_time', '').strip()
+
+
+   sql = '''
+         SELECT DISTINCT recipes.*
+         FROM recipes
+         LEFT JOIN recipe_ingredients ON recipes.recipe_id =
+recipe_ingredients.recipe_id
+         LEFT JOIN ingredients ON recipe_ingredients.ingredient_id =
+ingredients.ingredient_id
+         WHERE 1=1
+   '''
+   params = []
+
+
+   if ingredient_query:
+         sql += ' AND ingredients.name LIKE ?'
+         params.append('%' + ingredient_query + '%')
+
+
+   if category_query:
+         sql += ' AND recipes.category = ?'
+         params.append(category_query)
+
+
+   if difficulty_query:
+         sql += ' AND recipes.difficulty = ?'
+         params.append(difficulty_query)
+   if dietary_query:
+       sql += ' AND recipes.dietary = ?'
+       params.append(dietary_query)
+
+
+   if cook_time_query == 'under30':
+       sql += ' AND recipes.cook_time < 30'
+   elif cook_time_query == '30to60':
+       sql += ' AND recipes.cook_time >= 30 AND recipes.cook_time <= 60'
+   elif cook_time_query == 'over60':
+       sql += ' AND recipes.cook_time > 60'
+
+
+   recipes = db.execute(sql, params).fetchall()
+
+
+   categories = [row['category'] for row in db.execute('SELECT DISTINCT category FROM
+recipes WHERE category IS NOT NULL').fetchall()]
+   difficulties = [row['difficulty'] for row in db.execute('SELECT DISTINCT difficulty
+FROM recipes WHERE difficulty IS NOT NULL').fetchall()]
+   dietary_options = [row['dietary'] for row in db.execute('SELECT DISTINCT dietary
+FROM recipes WHERE dietary IS NOT NULL').fetchall()]
+
+
+   db.close()
+   return render_template(
+       'index.html',
+       recipes=recipes,
+       categories=categories,
+       difficulties=difficulties,
+       dietary_options=dietary_options
+   )
+
+
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+   if request.method == 'POST':
+       username = request.form['username']
+       email = request.form['email']
+       password = request.form['password']
+       hashed_pw = generate_password_hash(password)
+
+
+       db = get_db()
+       try:
+              db.execute(
+                 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+                (username, email, hashed_pw)
+           )
+           db.commit()
+      except sqlite3.IntegrityError:
+           flash('Username or email already taken.')
+           db.close()
+           return redirect(url_for('register'))
+      db.close()
+      return redirect(url_for('login'))
+
+
+   return render_template('register.html')
+
+
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+   if request.method == 'POST':
+      email = request.form['email']
+      password = request.form['password']
+
+
+      db = get_db()
+      row = db.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+      db.close()
+
+
+      if row and check_password_hash(row['password'], password):
+           user = User(row['user_id'], row['username'], row['email'])
+           login_user(user)
+           return redirect(url_for('index'))
+      else:
+           flash('Invalid email or password.')
+
+
+   return render_template('login.html')
+
+
+
+
+@app.route('/logout')
+@login_required
+def logout():
+   logout_user()
+   return redirect(url_for('index'))
+
+
+
+
+@app.route('/recipe/<int:recipe_id>')
+def recipe(recipe_id):
+   db = get_db()
+
+
+   recipe_data = db.execute('SELECT * FROM recipes WHERE recipe_id = ?',
+(recipe_id,)).fetchone()
+
+
+   if recipe_data is None:
+      db.close()
+      return "Recipe not found", 404
+
+
+   ingredients = db.execute('''
+      SELECT ingredients.name, recipe_ingredients.quantity
+      FROM recipe_ingredients
+      JOIN ingredients ON recipe_ingredients.ingredient_id =
+ingredients.ingredient_id
+      WHERE recipe_ingredients.recipe_id = ?
+   ''', (recipe_id,)).fetchall()
+
+
+   is_saved = False
+   if current_user.is_authenticated:
+      saved_row = db.execute(
+           'SELECT * FROM saved_recipes WHERE user_id = ? AND recipe_id = ?',
+           (current_user.id, recipe_id)
+      ).fetchone()
+      is_saved = saved_row is not None
+
+
+   db.close()
+   return render_template('recipe.html', recipe=recipe_data, ingredients=ingredients,
+is_saved=is_saved)
+
+
+
+
+@app.route('/save/<int:recipe_id>', methods=['POST'])
+@login_required
+def toggle_save(recipe_id):
+   db = get_db()
+
+
+   already_saved = db.execute(
+      'SELECT * FROM saved_recipes WHERE user_id = ? AND recipe_id = ?',
+      (current_user.id, recipe_id)
+   ).fetchone()
+
+
+   if already_saved:
+      db.execute(
+           'DELETE FROM saved_recipes WHERE user_id = ? AND recipe_id = ?',
+           (current_user.id, recipe_id)
+      )
+   else:
+      db.execute(
+           'INSERT INTO saved_recipes (user_id, recipe_id) VALUES (?, ?)',
+           (current_user.id, recipe_id)
+      )
+
+
+   db.commit()
+   db.close()
+   return redirect(url_for('recipe', recipe_id=recipe_id))
+
+
+
+
+@app.route('/like/<int:recipe_id>', methods=['POST'])
+@login_required
+def like_recipe(recipe_id):
+   db = get_db()
+   db.execute('UPDATE recipes SET likes = likes + 1 WHERE recipe_id = ?',
+(recipe_id,))
+   db.commit()
+   db.close()
+   return redirect(url_for('recipe', recipe_id=recipe_id))
+
+
+
+
+@app.route('/saved')
+@login_required
+def saved_recipes():
+   db = get_db()
+   recipes = db.execute('''
+      SELECT recipes.*
+      FROM recipes
+      JOIN saved_recipes ON recipes.recipe_id = saved_recipes.recipe_id
+      WHERE saved_recipes.user_id = ?
+   ''', (current_user.id,)).fetchall()
+   db.close()
+   return render_template('saved.html', recipes=recipes)
+
+
+
+
+if __name__ == '__main__':
+   os.makedirs('static/uploads', exist_ok=True)
+   init_db()
+app.run(debug=True, host='0.0.0.0', port=5001)
+import sqlite3
+
+
+DATABASE = 'cookbook.db'
+
+
+COOK_TIME_BY_DIFFICULTY = {
+    'Easy': 20,
+    'Medium': 40,
+    'High': 75,
+}
+
+
+def get_db():
+    db = sqlite3.connect(DATABASE)
+    db.row_factory = sqlite3.Row
+    db.execute("PRAGMA foreign_keys = ON")
+    return db
+
+
+def estimate_cook_times():
+    db = get_db()
+
+
+    missing = db.execute(
+       'SELECT recipe_id, difficulty FROM recipes WHERE cook_time IS NULL'
+    ).fetchall()
+
+
+    updated_counts = {'Easy': 0, 'Medium': 0, 'High': 0, 'Unknown': 0}
+
+
+    for recipe in missing:
+       difficulty = recipe['difficulty']
+       estimated_time = COOK_TIME_BY_DIFFICULTY.get(difficulty)
+
+
+       if estimated_time is None:
+            # Difficulty itself was somehow missing too — fall back to a
+            # safe default rather than leaving cook_time blank again.
+            estimated_time = 30
+            updated_counts['Unknown'] += 1
+       else:
+            updated_counts[difficulty] += 1
+
+
+       db.execute(
+            'UPDATE recipes SET cook_time = ? WHERE recipe_id = ?',
+            (estimated_time, recipe['recipe_id'])
+       )
+   db.commit()
+   db.close()
+
+
+   print(f"Estimated cook_time for {len(missing)} recipes that had none:")
+   for key, count in updated_counts.items():
+      if count:
+          print(f"   {key}: {count}")
+
+
+if __name__ == '__main__':
+   estimate_cook_times()
+import csv
+import ast
+import sqlite3
+
+
+DATABASE = 'cookbook.db'
+CSV_FILE = 'kaggle_recipes.csv'
+MAX_RECIPES_TO_IMPORT = 200
+
+
+csv.field_size_limit(10_000_000)
+def get_db():
+  db = sqlite3.connect(DATABASE)
+  db.row_factory = sqlite3.Row
+  db.execute("PRAGMA foreign_keys = ON")
+  return db
+
+
+def parse_ingredient_list(raw_value):
+  try:
+         ingredients = ast.literal_eval(raw_value)
+         if isinstance(ingredients, list):
+                return [i.strip() for i in ingredients if i and i.strip()]
+  except (ValueError, SyntaxError):
+         pass
+  return []
+
+
+def recipe_already_imported(db, title):
+  row = db.execute('SELECT recipe_id FROM recipes WHERE title = ?',
+(title,)).fetchone()
+  return row is not None
+
+
+def import_recipes():
+  db = get_db()
+  total_added = 0
+  total_skipped = 0
+
+
+  with open(CSV_FILE, newline='', encoding='utf-8') as f:
+         reader = csv.DictReader(f)
+
+
+         for row in reader:
+                if total_added >= MAX_RECIPES_TO_IMPORT:
+                   break
+
+
+                title = (row.get('Title') or '').strip()
+            instructions = (row.get('Instructions') or '').strip()
+            raw_ingredients = row.get('Ingredients') or '[]'
+
+
+            if not title or not instructions:
+                total_skipped += 1
+                continue
+
+
+            if recipe_already_imported(db, title):
+                total_skipped += 1
+                continue
+
+
+            ingredient_list = parse_ingredient_list(raw_ingredients)
+            if not ingredient_list:
+                total_skipped += 1
+                continue
+
+
+            cursor = db.execute(
+                '''INSERT INTO recipes (title, instructions, category, cook_time,
+difficulty)
+                    VALUES (?, ?, ?, ?, ?)''',
+                (title, instructions, 'Uncategorized', None, 'Medium')
+            )
+            recipe_id = cursor.lastrowid
+
+
+            for ingredient_phrase in ingredient_list:
+                name = ingredient_phrase.lower()
+                db.execute(
+                     'INSERT OR IGNORE INTO ingredients (name) VALUES (?)',
+                     (name,)
+                )
+                ingredient_row = db.execute(
+                     'SELECT ingredient_id FROM ingredients WHERE name = ?',
+                     (name,)
+                ).fetchone()
+
+
+                db.execute(
+    '''INSERT OR IGNORE INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
+      VALUES (?, ?, ?)''',
+    (recipe_id, ingredient_row['ingredient_id'], '')
+)
+
+
+            total_added += 1
+ db.commit()
+ db.close()
+ print(f"Done. Added {total_added} recipes ({total_skipped} skipped).")
+
+
+if __name__ == '__main__':
+ import_recipes()
+import csv
+import os
+import shutil
+import sqlite3
+
+
+DATABASE = 'cookbook.db'
+CSV_FILE = 'kaggle_recipes.csv'
+IMAGE_FOLDER = 'static/Food images'
+UPLOAD_FOLDER = 'static/uploads'
+MAX_RECIPES_TO_CHECK = 200
+VALID_EXTENSIONS = ['.jpg', '.jpeg', '.png']
+
+
+csv.field_size_limit(10_000_000)
+
+
+def get_db():
+  db = sqlite3.connect(DATABASE)
+  db.row_factory = sqlite3.Row
+  db.execute("PRAGMA foreign_keys = ON")
+  return db
+
+
+def find_image_file(image_name):
+  if not image_name or image_name.strip() == '' or image_name.strip() == '#NAME?':
+      return None
+
+
+  name = image_name.strip()
+  search_folders = [
+      IMAGE_FOLDER,
+      os.path.join(IMAGE_FOLDER, IMAGE_FOLDER),
+  ]
+
+
+  for folder in search_folders:
+      for ext in VALID_EXTENSIONS:
+             candidate = os.path.join(folder, name + ext)
+             if os.path.isfile(candidate):
+                return candidate
+
+
+  return None
+
+
+def link_images():
+  db = get_db()
+  os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+total_linked = 0
+total_missing = 0
+total_no_image_name = 0
+
+
+with open(CSV_FILE, newline='', encoding='utf-8') as f:
+   reader = csv.DictReader(f)
+
+
+   for i, row in enumerate(reader):
+        if i >= MAX_RECIPES_TO_CHECK:
+           break
+
+
+        title = (row.get('Title') or '').strip()
+        image_name = row.get('Image_Name') or ''
+
+
+        if not title:
+           continue
+
+
+        recipe_row = db.execute(
+           'SELECT recipe_id FROM recipes WHERE title = ?', (title,)
+        ).fetchone()
+
+
+        if recipe_row is None:
+           continue
+
+
+        recipe_id = recipe_row['recipe_id']
+
+
+        source_path = find_image_file(image_name)
+
+
+        if source_path is None:
+           if not image_name or image_name.strip() == '#NAME?':
+                   total_no_image_name += 1
+           else:
+                   total_missing += 1
+           continue
+
+
+        _, ext = os.path.splitext(source_path)
+        dest_filename = f'recipe_{recipe_id}{ext}'
+        dest_path = os.path.join(UPLOAD_FOLDER, dest_filename)
+        shutil.copy(source_path, dest_path)
+
+
+        web_path = f'/static/uploads/{dest_filename}'
+        db.execute(
+                 'UPDATE recipes SET image_file = ? WHERE recipe_id = ?',
+                 (web_path, recipe_id)
+            )
+            total_linked += 1
+
+
+ db.commit()
+ db.close()
+
+
+ print(f"Done.")
+ print(f"       Linked:               {total_linked}")
+ print(f"       Missing image file:   {total_missing}")
+ print(f"       No usable image name (blank or '#NAME?'): {total_no_image_name}")
+
+
+if __name__ == '__main__':
+ link_images()
+import sqlite3
+
+
+DATABASE = 'cookbook.db'
+
+
+CATEGORY_KEYWORDS = [
+    ('Breakfast', ['breakfast', 'pancake', 'waffle', 'omelet', 'oatmeal', 'granola',
+'muffin', 'brunch', 'french toast']),
+    ('Dessert',      ['cake', 'cookie', 'pie', 'brownie', 'dessert', 'pudding', 'tart',
+'ice cream', 'chocolate', 'cheesecake', 'sweet']),
+    ('Beverage',     ['smoothie', 'cocktail', 'drink', 'juice', 'lemonade', 'shake',
+'punch']),
+    ('Soup',         ['soup', 'stew', 'chili', 'bisque', 'chowder']),
+    ('Salad',        ['salad']),
+    ('Bread',        ['bread', 'loaf', 'roll', 'biscuit', 'bagel']),
+    ('Snack',        ['snack', 'dip', 'popcorn', 'chips', 'bar']),
+    ('Dinner',       ['chicken', 'beef', 'pork', 'fish', 'salmon', 'pasta', 'curry',
+                       'casserole', 'roast', 'steak', 'taco', 'burger', 'pizza', 'stir
+fry', 'meatball', 'lamb']),
+]
+
+
+def get_db():
+    db = sqlite3.connect(DATABASE)
+    db.row_factory = sqlite3.Row
+    db.execute("PRAGMA foreign_keys = ON")
+    return db
+
+
+def guess_category(title):
+    title_lower = title.lower()
+    for category, keywords in CATEGORY_KEYWORDS:
+       for keyword in keywords:
+               if keyword in title_lower:
+                   return category
+    return 'Other'
+
+
+def guess_difficulty(ingredient_count, instruction_word_count):
+    if ingredient_count <= 5 and instruction_word_count <= 80:
+       return 'Easy'
+    if ingredient_count >= 12 or instruction_word_count >= 250:
+       return 'High'
+    return 'Medium'
+
+
+def reassign():
+   db = get_db()
+
+
+   uncategorized = db.execute(
+      "SELECT recipe_id, title FROM recipes WHERE category = 'Uncategorized'"
+   ).fetchall()
+
+
+   category_counts = {}
+   for recipe in uncategorized:
+      new_category = guess_category(recipe['title'])
+      db.execute(
+             'UPDATE recipes SET category = ? WHERE recipe_id = ?',
+             (new_category, recipe['recipe_id'])
+      )
+      category_counts[new_category] = category_counts.get(new_category, 0) + 1
+
+
+   all_recipes = db.execute('SELECT recipe_id, instructions FROM recipes').fetchall()
+
+
+   difficulty_counts = {'Easy': 0, 'Medium': 0, 'High': 0}
+   for recipe in all_recipes:
+      ingredient_count = db.execute(
+             'SELECT COUNT(*) as c FROM recipe_ingredients WHERE recipe_id = ?',
+             (recipe['recipe_id'],)
+      ).fetchone()['c']
+
+
+      instruction_word_count = len((recipe['instructions'] or '').split())
+
+
+      new_difficulty = guess_difficulty(ingredient_count, instruction_word_count)
+      db.execute(
+             'UPDATE recipes SET difficulty = ? WHERE recipe_id = ?',
+             (new_difficulty, recipe['recipe_id'])
+      )
+      difficulty_counts[new_difficulty] += 1
+
+
+   db.commit()
+   db.close()
+
+
+   print(f"Categories reassigned for {len(uncategorized)} previously 'Uncategorized'
+recipes:")
+   for cat, count in sorted(category_counts.items(), key=lambda x: -x[1]):
+      print(f"     {cat}: {count}")
+
+
+   print(f"\nDifficulty recomputed for all {len(all_recipes)} recipes:")
+   for diff, count in difficulty_counts.items():
+      print(f"   {diff}: {count}")
+
+
+if __name__ == '__main__':
+   reassign()
+.recipe-detail {
+ max-width: 1500px;
+ margin: 0 auto;
+ padding: 30px;
+}
+
+
+.recipe-name-box {
+ font-size: 28px;
+ margin-bottom: 40px;
+ text-align: left;
+ text-decoration: underline;
+ color: #3E2723;
+}
+
+
+.recipe-detail-columns {
+ display: flex;
+ gap: 50px;
+ margin-bottom: 30px;
+}
+
+
+.recipe-column {
+ display: flex;
+ flex-direction: column;
+}
+
+
+.recipe-ingredients-col {
+ width: 300px;
+ flex-shrink: 0;
+}
+
+
+.recipe-ingredients-col h2 {
+ font-size: 16px;
+ margin-bottom: 15px;
+ color: #3E2723;
+}
+
+
+.ingredient-list {
+ list-style-position: outside;
+ line-height: 2;
+ text-align: left;
+ margin-left: 0;
+ padding-left: 20px;
+}
+
+
+.ingredient-list li {
+ margin-bottom: 10px;
+}
+
+
+.recipe-instructions-col {
+ flex: 1;
+ min-width: 300px;
+}
+
+
+.recipe-instructions-col h2 {
+ font-size: 16px;
+ margin-bottom: 15px;
+ color: #3E2723;
+}
+
+
+.recipe-instructions {
+ line-height: 2;
+ text-align: justify;
+ color: #3E2723;
+}
+
+
+.recipe-stats-box {
+ padding: 20px;
+ background-color: #FFFEF5;
+ border-radius: 10px;
+ max-width: 200px;
+ border-left: 4px solid #D24558;
+
+
+}
+
+
+.recipe-stats-box p {
+ margin-bottom: 5px;
+ color: #3E2723;
+ font-size: 14px;
+ text-align: left;
+ line-height: 1.75;
+}
+
+
+.rating-form {
+ display: inline-block;
+}
+
+
+.btn-rating {
+ background: white;
+ border: 1px solid #D24558;
+ border-radius: 8px;
+ padding: 6px 12px;
+ margin-right: 8px;
+ font-size: 10px;
+ cursor: pointer;
+}
+
+
+.btn-rating:hover {
+ background: #f4f6fa
+}
+
+
+.share-box {
+ margin-top: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+body {
+font-family: 'Georgia';
+background: #FCE9AB;
+color: #3E2723;
+}
+
+
+.navbar {
+background: #D24558;
+padding: 30px 30px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+
+.logo {
+color: #3E2723;
+font-size: 40px;
+font-weight: 700;
+text-decoration: none;
+}
+
+
+.nav-links { display: flex; gap: 45px; }
+.nav-links a { color: #3E2723; text-decoration: none; font-weight: 600; }
+.nav-links a:hover { color: white; }
+
+
+.container {
+max-width: 2000px;
+margin: 0 auto;
+padding: 30px 80px;
+text-align: center;
+}
+
+
+h1 { font-size: 30px; margin-bottom: 30px; }
+
+
+.subtitle {
+color: #3E2723;
+margin-bottom: 40px;
+font-size: 15px;
+font-weight: 600;
+}
+.form-group {
+margin-bottom: 18px;
+display: flex;
+flex-direction: column;
+}
+
+
+.form-group label {
+font-size: 13px;
+font-weight: 600;
+color: #3E2723;
+margin-bottom: 6px;
+}
+
+
+.form-group input {
+padding: 12px 14px;
+border: 1px solid #d8deee;
+border-radius: 8px;
+font-size: 14px;
+font-family: inherit;
+}
+
+
+.form-group input:focus {
+outline: none;
+border-color: #1a2340;
+}
+
+
+.btn-primary {
+width: 120px;
+padding: 12px;
+background: #D24558;
+color: #3E2723;
+border: none;
+border-radius: 8px;
+font-size: 15px;
+font-weight: 600;
+font-family: 'Georgia';
+cursor: pointer;
+margin-top: 6px;
+}
+
+
+.btn-primary:hover {
+background: #c93d52;
+}
+
+
+form {
+max-width: 300px;
+margin: 0 auto;
+}
+
+
+.search-form {
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+
+.search-form input {
+width: 100%;
+padding: 12px 8px;
+border: 1px solid #d8deee;
+border-radius: 8px;
+font-size: 14px;
+font-family: inherit;
+text-align: center;
+}
+
+
+.search-form button {
+width: 130px;
+margin: 0 auto;
+}
+
+
+.recipe-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+gap: 15px;
+margin-top: 24px;
+}
+
+
+.recipe-card {
+background: white;
+border-radius: 8px;
+padding: 16px;
+box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+width: 220px;
+min-height: 130px;
+display: flex;
+flex-direction: column;
+justify-content: center;
+text-align: center;
+}
+
+
+.recipe-card h3 {
+color: #3E2723;
+text-decoration: none;
+margin-bottom: 12px;
+font-size: 17px;
+}
+
+
+.recipe-card p {
+margin-top: 8px;
+color: #3E2723;
+font-size: 13px;
+}
+
+
+.recipe-card-link {
+text-decoration: none;
+}
+
+
+.homepage-layout {
+ display: flex;
+ gap: 42px;
+ align-items: flex-start;
+ margin-top: 24px;
+}
+
+
+.sidebar {
+ width: 300px;
+ flex-shrink: 0;
+}
+
+
+.search-info {
+ margin-top: 20px;
+ padding: 12px;
+ background-color: #FFF9E6;
+ border-left: 3px solid #D24558;
+ border-radius: 4px;
+ font-size: 13px;
+ line-height: 1.5;
+}
+
+
+.search-info p {
+ margin: 0;
+ color: #3E2723;
+}
+
+
+.about-munch {
+ margin-top: 30px;
+ padding: 20px;
+ background-color: white;
+ border-radius: 8px;
+ border-left: 4px solid #D24558;
+}
+
+
+.about-munch h3 {
+ font-size: 20px;
+ margin-bottom: 12px;
+ color: #3E2723;
+ font-weight: 700;
+}
+
+
+.about-munch p {
+ font-size: 14px;
+ line-height: 1.75;
+ color: #3E2723;
+ margin: 0;
+ text-align: justify;
+}
+
+
+.sidebar-heading {
+ margin-top: 24px;
+ margin-bottom: 12px;
+ font-size: 14px;
+ color: #1a2340;
+}
+
+
+.ingredient-chip-list {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 8px;
+}
+
+
+.ingredient-chip {
+ background: #D24558;
+ border: 1px solid #D24558;
+ border-radius: 20px;
+ padding: 6px 14px;
+ color: white;
+ text-decoration: none;
+ font-size: 12px;
+}
+
+
+.ingredient-chip:hover {
+ background: #3E2723;
+ color: white;
+}
+
+
+.main-content {
+ flex: 1;
+}
+
+
+.filter-row {
+ display: flex;
+ gap: 50px;
+ margin-bottom: 24px;
+ justify-content: space-between;
+ align-items: center;
+ display: flex;
+ width: 100%;
+}
+
+
+.filter-row .btn-primary {
+ width: auto;
+ flex: 0 0 auto;
+ margin-top: 0;
+}
+
+
+.filter-row select {
+ padding: 8px 12px;
+ border: 1px solid #d8deee;
+ border-radius: 8px;
+font-family: 'Georgia';
+color: #3E2723;
+font-weight: 600;
+width: 160px;
+text-align: center;
+}
+

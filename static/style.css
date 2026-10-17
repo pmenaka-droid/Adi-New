@@ -1,0 +1,293 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+body {
+font-family: 'Georgia';
+background: #FCE9AB;
+color: #3E2723;
+}
+
+
+.navbar {
+background: #D24558;
+padding: 30px 30px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+
+.logo {
+color: #3E2723;
+font-size: 40px;
+font-weight: 700;
+text-decoration: none;
+}
+
+
+.nav-links { display: flex; gap: 45px; }
+.nav-links a { color: #3E2723; text-decoration: none; font-weight: 600; }
+.nav-links a:hover { color: white; }
+
+
+.container {
+max-width: 2000px;
+margin: 0 auto;
+padding: 30px 80px;
+text-align: center;
+}
+
+
+h1 { font-size: 30px; margin-bottom: 30px; }
+
+
+.subtitle {
+color: #3E2723;
+margin-bottom: 40px;
+font-size: 15px;
+font-weight: 600;
+}
+.form-group {
+margin-bottom: 18px;
+display: flex;
+flex-direction: column;
+}
+
+
+.form-group label {
+font-size: 13px;
+font-weight: 600;
+color: #3E2723;
+margin-bottom: 6px;
+}
+
+
+.form-group input {
+padding: 12px 14px;
+border: 1px solid #d8deee;
+border-radius: 8px;
+font-size: 14px;
+font-family: inherit;
+}
+
+
+.form-group input:focus {
+outline: none;
+border-color: #1a2340;
+}
+
+
+.btn-primary {
+width: 120px;
+padding: 12px;
+background: #D24558;
+color: #3E2723;
+border: none;
+border-radius: 8px;
+font-size: 15px;
+font-weight: 600;
+font-family: 'Georgia';
+cursor: pointer;
+margin-top: 6px;
+}
+
+
+.btn-primary:hover {
+background: #c93d52;
+}
+
+
+form {
+max-width: 300px;
+margin: 0 auto;
+}
+
+
+.search-form {
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+
+.search-form input {
+width: 100%;
+padding: 12px 8px;
+border: 1px solid #d8deee;
+border-radius: 8px;
+font-size: 14px;
+font-family: inherit;
+text-align: center;
+}
+
+
+.search-form button {
+width: 130px;
+margin: 0 auto;
+}
+
+
+.recipe-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+gap: 15px;
+margin-top: 24px;
+}
+
+
+.recipe-card {
+background: white;
+border-radius: 8px;
+padding: 16px;
+box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+width: 220px;
+min-height: 130px;
+display: flex;
+flex-direction: column;
+justify-content: center;
+text-align: center;
+}
+
+
+.recipe-card h3 {
+color: #3E2723;
+text-decoration: none;
+margin-bottom: 12px;
+font-size: 17px;
+}
+
+
+.recipe-card p {
+margin-top: 8px;
+color: #3E2723;
+font-size: 13px;
+}
+
+
+.recipe-card-link {
+text-decoration: none;
+}
+
+
+.homepage-layout {
+ display: flex;
+ gap: 42px;
+ align-items: flex-start;
+ margin-top: 24px;
+}
+
+
+.sidebar {
+ width: 300px;
+ flex-shrink: 0;
+}
+
+
+.search-info {
+ margin-top: 20px;
+ padding: 12px;
+ background-color: #FFF9E6;
+ border-left: 3px solid #D24558;
+ border-radius: 4px;
+ font-size: 13px;
+ line-height: 1.5;
+}
+
+
+.search-info p {
+ margin: 0;
+ color: #3E2723;
+}
+
+
+.about-munch {
+ margin-top: 30px;
+ padding: 20px;
+ background-color: white;
+ border-radius: 8px;
+ border-left: 4px solid #D24558;
+}
+
+
+.about-munch h3 {
+ font-size: 20px;
+ margin-bottom: 12px;
+ color: #3E2723;
+ font-weight: 700;
+}
+
+
+.about-munch p {
+ font-size: 14px;
+ line-height: 1.75;
+ color: #3E2723;
+ margin: 0;
+ text-align: justify;
+}
+
+
+.sidebar-heading {
+ margin-top: 24px;
+ margin-bottom: 12px;
+ font-size: 14px;
+ color: #1a2340;
+}
+
+
+.ingredient-chip-list {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 8px;
+}
+
+
+.ingredient-chip {
+ background: #D24558;
+ border: 1px solid #D24558;
+ border-radius: 20px;
+ padding: 6px 14px;
+ color: white;
+ text-decoration: none;
+ font-size: 12px;
+}
+
+
+.ingredient-chip:hover {
+ background: #3E2723;
+ color: white;
+}
+
+
+.main-content {
+ flex: 1;
+}
+
+
+.filter-row {
+ display: flex;
+ gap: 50px;
+ margin-bottom: 24px;
+ justify-content: space-between;
+ align-items: center;
+ display: flex;
+ width: 100%;
+}
+
+
+.filter-row .btn-primary {
+ width: auto;
+ flex: 0 0 auto;
+ margin-top: 0;
+}
+
+
+.filter-row select {
+ padding: 8px 12px;
+ border: 1px solid #d8deee;
+ border-radius: 8px;
+font-family: 'Georgia';
+color: #3E2723;
+font-weight: 600;
+width: 160px;
+text-align: center;
+}

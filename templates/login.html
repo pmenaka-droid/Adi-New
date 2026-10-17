@@ -1,0 +1,45 @@
+<!-- Extends the base layout and sets the page title to Login -->
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+
+
+<!-- Begins main content section -->
+{% block content %}
+
+
+<!-- Page Heading -->
+<h1>Login to Existing Account</h1>
+
+
+<!-- Displays any temporary messages or errors sent by Flask -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+ {% for message in messages %}
+   <p style="color:red;">{{ message }}</p>
+ {% endfor %}
+{% endif %}
+{% endwith %}
+
+
+<!-- Creates a form which allows user to enter Email-->
+<form method="POST">
+<div class="form-group">
+<label for="email">Email</label>
+<input type="email" id="email" name="email" required>
+</div>
+
+
+<!-- Creates a form which allows user to enter Password-->
+<div class="form-group">
+<label for="password">Password</label>
+<input type="password" id="password" name="password" required>
+</div>
+
+
+<!--Creates a submit button-->
+<button type="submit" class="btn-primary">Login</button>
+</form>
+
+
+<!-- End main content section -->
+{% endblock %}
