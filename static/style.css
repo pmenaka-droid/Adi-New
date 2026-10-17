@@ -304,3 +304,12 @@ text-align: center;
 .planner-empty { padding: 20px; margin-bottom: 20px; background: white; border-radius: 8px; }
 button:disabled { opacity: .6; cursor: default; }
 @media (max-width: 600px) { .container { padding: 24px 16px; } .navbar, .nav-links { flex-wrap: wrap; gap: 18px; } }
+
+.sidebar-saved { margin-top: 24px; padding: 20px; background: white; border-radius: 8px; border-left: 4px solid #D24558; text-align: left; }
+.sidebar-saved h3 { font-size: 20px; margin-bottom: 12px; }
+.sidebar-saved p, .sidebar-saved li { font-size: 14px; line-height: 1.75; }
+.sidebar-saved ul { padding-left: 20px; }
+.sidebar-saved li { margin-bottom: 8px; overflow-wrap: anywhere; }
+.sidebar-saved a { color: #3E2723; }
+.sidebar-saved a:hover { color: #D24558; }
+.sidebar-saved-all { display: inline-block; margin-top: 12px; font-size: 14px; }

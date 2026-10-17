@@ -168,9 +168,19 @@ ingredients.ingredient_id
    dietary_options = [row['dietary'] for row in db.execute('SELECT DISTINCT dietary FROM recipes WHERE dietary IS NOT NULL').fetchall()]
 
 
+   sidebar_saved_recipes = []
+   if current_user.is_authenticated:
+       sidebar_saved_recipes = db.execute(
+           """SELECT recipes.recipe_id, recipes.title FROM recipes
+              JOIN saved_recipes ON recipes.recipe_id = saved_recipes.recipe_id
+              WHERE saved_recipes.user_id = ? ORDER BY recipes.title""",
+           (current_user.id,)
+       ).fetchall()
+
    db.close()
    return render_template(
        'index.html',
+       sidebar_saved_recipes=sidebar_saved_recipes,
        recipes=recipes,
        categories=categories,
        difficulties=difficulties,

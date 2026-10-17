@@ -31,6 +31,23 @@ delicious meals.
 use filters for maximum personalization or browse through a wide variety of
 dishes.</p>
   </div>
+  <section class="sidebar-saved" aria-labelledby="sidebar-saved-heading">
+    <h3 id="sidebar-saved-heading">Saved Recipes</h3>
+    {% if current_user.is_authenticated %}
+      {% if sidebar_saved_recipes %}
+        <ul>
+          {% for saved_recipe in sidebar_saved_recipes %}
+          <li><a href="{{ url_for('recipe', recipe_id=saved_recipe['recipe_id']) }}">{{ saved_recipe['title'] }}</a></li>
+          {% endfor %}
+        </ul>
+        <a class="sidebar-saved-all" href="{{ url_for('saved_recipes') }}">View all saved recipes →</a>
+      {% else %}
+        <p>No saved recipes yet. Open a recipe and click “Save Recipe” to add it here.</p>
+      {% endif %}
+    {% else %}
+      <p><a href="{{ url_for('login') }}">Log in</a> to see your saved recipes.</p>
+    {% endif %}
+  </section>
 </aside>
 
 
