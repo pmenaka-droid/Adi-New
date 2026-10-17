@@ -27,7 +27,6 @@ the MUNCH. favicon -->
   <div class="nav-links">
     {% if current_user.is_authenticated %}
          <a href="{{ url_for('meal_planner') }}">Meal Planner</a>
-         <a href="{{ url_for('saved_recipes') }}">Saved Recipes</a>
          <a href="{{ url_for('logout') }}">Logout ({{ current_user.username }})</a>
     {% else %}
          <a href="{{ url_for('login') }}">Login</a>
