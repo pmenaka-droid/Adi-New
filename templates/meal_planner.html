@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Meal Planner · MUNCH.{% endblock %}
+{% block content %}
+<h1>Your Weekly Meal Planner</h1>
+<p class="subtitle">Choose recipes for breakfast, lunch, and dinner. Each saved slot belongs to your account.</p>
+<nav class="planner-navigation" aria-label="Choose week">
+  <a href="{{ url_for('meal_planner', week=previous_week) }}">← Previous week</a>
+  <strong>{{ days[0].strftime('%d %b %Y') }} – {{ days[-1].strftime('%d %b %Y') }}</strong>
+  <a href="{{ url_for('meal_planner', week=next_week) }}">Next week →</a>
+</nav>
+{% if not recipes %}
+<p class="planner-empty">No recipes are available yet. Import your recipe dataset to start planning meals.</p>
+{% endif %}
+<div class="planner-grid">
+{% for day in days %}
+<section class="planner-day">
+  <h2>{{ day.strftime('%A') }}</h2>
+  <p>{{ day.strftime('%d %b') }}</p>
+  {% for meal_type in meal_types %}
+  {% set entry = plan.get((day.isoformat(), meal_type)) %}
+  <form method="POST" class="planner-slot">
+    <input type="hidden" name="week" value="{{ week }}">
+    <input type="hidden" name="meal_date" value="{{ day.isoformat() }}">
+    <input type="hidden" name="meal_type" value="{{ meal_type }}">
+    <label for="meal-{{ day.isoformat() }}-{{ meal_type }}">{{ meal_type }}</label>
+    {% if entry %}<a href="{{ url_for('recipe', recipe_id=entry['recipe_id']) }}">{{ entry['title'] }}</a>{% endif %}
+    <select id="meal-{{ day.isoformat() }}-{{ meal_type }}" name="recipe_id" {% if not recipes %}disabled{% endif %}>
+      <option value="">No meal planned</option>
+      {% for recipe in recipes %}
+      <option value="{{ recipe['recipe_id'] }}" {% if entry and entry['recipe_id'] == recipe['recipe_id'] %}selected{% endif %}>{{ recipe['title'] }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn-primary" type="submit" {% if not recipes %}disabled{% endif %}>Save slot</button>
+    {% if entry %}<button class="planner-remove" type="submit" name="action" value="remove">Remove</button>{% endif %}
+  </form>
+  {% endfor %}
+</section>
+{% endfor %}
+</div>
+{% endblock %}

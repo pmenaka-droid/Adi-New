@@ -1,8 +1,10 @@
 import sqlite3
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, UserMixin, login_user, logout_user,
-login_required, current_user
+from flask_login import (LoginManager, UserMixin, login_user, logout_user,
+                         login_required, current_user)
+from datetime import date, timedelta
+from flask import abort
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -22,7 +24,7 @@ def get_db():
 
 
 def init_db():
-   """Create all 5 tables when the app starts"""
+   """Create application tables without replacing existing data."""
    db = get_db()
    db.executescript('''
       CREATE TABLE IF NOT EXISTS users (
@@ -76,6 +78,13 @@ def init_db():
                FOREIGN KEY (recipe_id)
                   REFERENCES recipes(recipe_id)
           );
+      CREATE TABLE IF NOT EXISTS meal_plans (
+          user_id INTEGER NOT NULL REFERENCES users(user_id),
+          meal_date TEXT NOT NULL,
+          meal_type TEXT NOT NULL CHECK (meal_type IN ('Breakfast', 'Lunch', 'Dinner')),
+          recipe_id INTEGER NOT NULL REFERENCES recipes(recipe_id),
+          PRIMARY KEY (user_id, meal_date, meal_type)
+      );
    ''')
    db.commit()
    db.close()
@@ -154,12 +163,9 @@ ingredients.ingredient_id
    recipes = db.execute(sql, params).fetchall()
 
 
-   categories = [row['category'] for row in db.execute('SELECT DISTINCT category FROM
-recipes WHERE category IS NOT NULL').fetchall()]
-   difficulties = [row['difficulty'] for row in db.execute('SELECT DISTINCT difficulty
-FROM recipes WHERE difficulty IS NOT NULL').fetchall()]
-   dietary_options = [row['dietary'] for row in db.execute('SELECT DISTINCT dietary
-FROM recipes WHERE dietary IS NOT NULL').fetchall()]
+   categories = [row['category'] for row in db.execute('SELECT DISTINCT category FROM recipes WHERE category IS NOT NULL').fetchall()]
+   difficulties = [row['difficulty'] for row in db.execute('SELECT DISTINCT difficulty FROM recipes WHERE difficulty IS NOT NULL').fetchall()]
+   dietary_options = [row['dietary'] for row in db.execute('SELECT DISTINCT dietary FROM recipes WHERE dietary IS NOT NULL').fetchall()]
 
 
    db.close()
@@ -185,17 +191,17 @@ def register():
 
        db = get_db()
        try:
-              db.execute(
-                 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-                (username, email, hashed_pw)
+           db.execute(
+               'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+               (username, email, hashed_pw)
            )
            db.commit()
-      except sqlite3.IntegrityError:
+       except sqlite3.IntegrityError:
            flash('Username or email already taken.')
            db.close()
            return redirect(url_for('register'))
-      db.close()
-      return redirect(url_for('login'))
+       db.close()
+       return redirect(url_for('login'))
 
 
    return render_template('register.html')
@@ -336,7 +342,65 @@ def saved_recipes():
 
 
 
+MEAL_TYPES = ('Breakfast', 'Lunch', 'Dinner')
+
+
+@app.route('/meal-planner', methods=['GET', 'POST'])
+@login_required
+def meal_planner():
+    raw_week = request.values.get('week', date.today().isoformat())
+    try:
+        selected = date.fromisoformat(raw_week)
+        monday = selected - timedelta(days=selected.weekday())
+        days = [monday + timedelta(days=i) for i in range(7)]
+        previous_week = monday - timedelta(days=7)
+        next_week = monday + timedelta(days=7)
+    except (ValueError, OverflowError):
+        abort(400, 'Invalid week.')
+
+    db = get_db()
+    try:
+        if request.method == 'POST':
+            meal_date = request.form.get('meal_date', '')
+            meal_type = request.form.get('meal_type', '')
+            recipe_id = '' if request.form.get('action') == 'remove' else request.form.get('recipe_id', '')
+            if meal_date not in [day.isoformat() for day in days] or meal_type not in MEAL_TYPES:
+                abort(400, 'Invalid meal slot.')
+            if recipe_id:
+                if not recipe_id.isdecimal() or not db.execute(
+                    'SELECT 1 FROM recipes WHERE recipe_id = ?', (recipe_id,)
+                ).fetchone():
+                    abort(400, 'Choose an existing recipe.')
+                db.execute(
+                    """INSERT INTO meal_plans (user_id, meal_date, meal_type, recipe_id)
+                       VALUES (?, ?, ?, ?)
+                       ON CONFLICT(user_id, meal_date, meal_type)
+                       DO UPDATE SET recipe_id = excluded.recipe_id""",
+                    (current_user.id, meal_date, meal_type, recipe_id)
+                )
+            else:
+                db.execute(
+                    'DELETE FROM meal_plans WHERE user_id = ? AND meal_date = ? AND meal_type = ?',
+                    (current_user.id, meal_date, meal_type)
+                )
+            db.commit()
+            return redirect(url_for('meal_planner', week=monday.isoformat()))
+        recipes = db.execute('SELECT recipe_id, title FROM recipes ORDER BY title').fetchall()
+        rows = db.execute(
+            """SELECT meal_plans.*, recipes.title FROM meal_plans
+               JOIN recipes USING (recipe_id)
+               WHERE user_id = ? AND meal_date BETWEEN ? AND ?""",
+            (current_user.id, days[0].isoformat(), days[-1].isoformat())
+        ).fetchall()
+    finally:
+        db.close()
+    plan = {(row['meal_date'], row['meal_type']): row for row in rows}
+    return render_template('meal_planner.html', days=days, meal_types=MEAL_TYPES,
+                           recipes=recipes, plan=plan, week=monday.isoformat(),
+                           previous_week=previous_week.isoformat(), next_week=next_week.isoformat())
+
+
 if __name__ == '__main__':
    os.makedirs('static/uploads', exist_ok=True)
    init_db()
-app.run(debug=True, host='0.0.0.0', port=5001)
+   app.run(debug=True, host='0.0.0.0', port=5001)

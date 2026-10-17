@@ -1,6 +1,6 @@
 # Code extracted from GitHub Code (1).pdf
 
-This is a direct text extraction of the supplied 41-page PDF. Only PDF page separators were removed from the source files. No code, spelling, wrapping, or indentation repairs have been applied. Original source filenames were not shown; filenames were inferred from template references and function names.
+The project started as a text extraction of the supplied 41-page PDF. The application now includes a weekly meal planner and repairs to the main application needed to run it. The original extraction is preserved in `docs/pdf-extraction.txt`. Original source filenames were inferred from template references and function names.
 
 ## Source map
 
@@ -20,14 +20,33 @@ This is a direct text extraction of the supplied 41-page PDF. Only PDF page sepa
 
 ## Current limitations
 
-The PDF includes Python line wrapping and inconsistent indentation, so this exact transcription is not runnable yet. Flask and Flask-Login are referenced. The CSV (`kaggle_recipes.csv`), food images, and database contents are not included in the PDF; the application includes database schema initialization. No data or assets have been invented.
+The main application formatting has been repaired. The standalone dataset utility scripts still contain the PDF’s line wrapping and indentation errors and need repairs before use. The CSV (`kaggle_recipes.csv`), food images, and database contents are not included in the PDF; the application includes database schema initialization. No data or assets have been invented.
 
 The unmodified text extraction, including page separators, is retained in `docs/pdf-extraction.txt`.
 
-Syntax check results (source left unchanged):
+Original extraction syntax check results (the `app.py` issues below have since been repaired):
 
 - `app.py`: line 157: unterminated string literal (detected at line 157).
 - `estimate_cook_times.py`: line 51: unindent does not match any outer indentation level.
 - `import_recipes.py`: line 51: unindent does not match any outer indentation level.
 - `link_images.py`: line 106: unexpected indent.
 - `reassign_categories.py`: line 19: unterminated string literal (detected at line 19).
+
+## Run the application
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python app.py
+```
+
+The development server uses port 5001. In Codespaces, open that port through the Ports panel. Startup creates any missing SQLite tables while keeping existing data.
+
+Register or log in, then choose **Meal Planner** in the navigation. Select a recipe for any breakfast, lunch, or dinner slot and click **Save slot**. Use **Remove** to clear a slot and the week links to plan other weeks. Plans are saved separately for each account. Recipes must already exist in the database; the PDF did not include a recipe dataset.
+
+Run the feature tests with:
+
+```bash
+python -m unittest discover -s tests -v
+```
